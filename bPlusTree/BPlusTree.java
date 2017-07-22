@@ -1,4 +1,4 @@
-package bPlusTree;
+package DataMiningLab.bPlusTree;
 
 public class BPlusTree {
 	int n;
