@@ -12,12 +12,26 @@ public class AlternateBPlusTree {
 	}
 	
 	public void print(){
-		printNode(root);
+		printNode(root,0);
 	}
-	public void printNode(Node C){
+	public void printNode(Node C, int depth){
 		if(C.isLeafNode){
-			for(int i = 0 ; )
+			System.out.println("depth: " + depth);
+			for(int i = 0 ; i < C.numberOfValue; i++){
+				System.out.print(C.arr[i].value + " ");
+			}
+			System.out.println();
+			return;
 		}
+		System.out.println("depth: " + depth);
+		for(int i = 0 ; i < C.numberOfValue ; i++){
+			System.out.print(C.arr[i].value + " ");
+		}
+		System.out.println();
+		for(int i = 0 ; i < C.numberOfValue ; i++){
+			printNode(C.arr[i].pointer, depth + 1);
+		}
+		printNode(C.arr[C.numberOfValue].pointer, depth + 1);
 	}
 	
 	public Node find(int value){

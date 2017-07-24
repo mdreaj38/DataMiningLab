@@ -2,13 +2,7 @@ package DataMiningLab.bPlusTree;
 
 public class Main {
 	public static void main(String args[]){
-		//BPlusTree bpt = new BPlusTree(4);
 		AlternateBPlusTree bpt = new AlternateBPlusTree(4);
-		/*bpt.insert(4,null);
-		bpt.insert(3,null);
-		bpt.insert(1,null);
-		bpt.insert(2,null);*/
-		
 		bpt.insert(11, null);
 		bpt.insert(12, null);
 		bpt.insert(9, null);
@@ -24,6 +18,7 @@ public class Main {
 		
 		
 		System.out.println("starting find()");
-		bpt.find(12);
+		//bpt.find(12);
+		bpt.print();
 	}
 }
