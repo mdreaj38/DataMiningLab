@@ -11,6 +11,15 @@ public class AlternateBPlusTree {
 		root.setIsLeafNode(true);
 	}
 	
+	public void print(){
+		printNode(root);
+	}
+	public void printNode(Node C){
+		if(C.isLeafNode){
+			for(int i = 0 ; )
+		}
+	}
+	
 	public Node find(int value){
 		Node C = root;
 		int depth = 0;
@@ -141,6 +150,7 @@ public class AlternateBPlusTree {
 			T.arr[i].pointer = P.arr[i].pointer;
 			T.arr[i].value = P.arr[i].value;
 		}
+		
 		for(int i = 0 ; i < n + 1 ; i++){
 			if(T.arr[i].pointer == N){
 				for(int j = n; j > i ; j--){
@@ -170,14 +180,16 @@ public class AlternateBPlusTree {
 			P.setNumberOfValue(i + 1);
 		}
 		int K__ = T.arr[(int)Math.ceil((n+1.0)/2)-1].value;
-		
-		for(int i = (int)Math.ceil((n+1.0)/2), j = 0 ; i < n+1 ; i++, j++){
+		int j = 0;
+		for(int i = (int)Math.ceil((n+1.0)/2); i < n ; i++, j++){
 			if(j == 0) K_ = T.arr[i].value;
 			P_.arr[j].pointer = T.arr[i].pointer;
 			P_.arr[j].pointer.setParent(P_);
 			P_.arr[j].value = T.arr[i].value;
 			P_.setNumberOfValue(j + 1);
 		}
+		P_.arr[j].pointer = T.arr[n].pointer;
+		P_.arr[j].pointer.setParent(P_);
 		insertInParent(P,K__,P_);
 	}
 }
