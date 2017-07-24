@@ -1,5 +1,7 @@
 package DataMiningLab.bPlusTree;
 
+import java.util.LinkedList;
+
 public class AlternateBPlusTree {
 	
 	int n;
@@ -12,40 +14,48 @@ public class AlternateBPlusTree {
 	}
 	
 	public void print(){
-		printNode(root,0);
-	}
-	public void printNode(Node C, int depth){
-		if(C.isLeafNode){
-			System.out.println("depth: " + depth);
-			for(int i = 0 ; i < C.numberOfValue; i++){
-				System.out.print(C.arr[i].value + " ");
+		LinkedList<Node> queue = new LinkedList<Node>();
+		queue.add(root);
+		LinkedList<Integer> depth = new LinkedList<Integer>();
+		
+		depth.add(0);
+		int currentDepth = -1;
+		while(!queue.isEmpty()){
+			Node cur = queue.pop();
+			int d = depth.pop();
+			if(currentDepth < d){
+				System.out.println();
+				currentDepth++;
 			}
-			System.out.println();
-			return;
+			for(int i = 0 ; i < d; i++){
+				System.out.print(" ");
+			}
+			System.out.print("|");
+			for(int i = 0 ; i < cur.numberOfValue+1 ; i++){
+				if(cur.numberOfValue != i)
+					System.out.print(cur.arr[i].value + "|");
+				if(!cur.isLeafNode){
+					depth.add(d+1);
+					queue.add(cur.arr[i].pointer);
+				}
+				
+			}
+			
 		}
-		System.out.println("depth: " + depth);
-		for(int i = 0 ; i < C.numberOfValue ; i++){
-			System.out.print(C.arr[i].value + " ");
-		}
-		System.out.println();
-		for(int i = 0 ; i < C.numberOfValue ; i++){
-			printNode(C.arr[i].pointer, depth + 1);
-		}
-		printNode(C.arr[C.numberOfValue].pointer, depth + 1);
 	}
 	
 	public Node find(int value){
 		Node C = root;
 		int depth = 0;
 		while(!C.getIsLeafNode()){
-			System.out.println("Depth : " + depth++);
+			//System.out.println("Depth : " + depth++);
 			
 			PointerKey arr[] = C.getArr();
-			System.out.println("Value: ");
+			//System.out.println("Value: ");
 			for(int i = 0 ; i < C.getNumberOfValue() ; i++){
-				System.out.print(arr[i].value + " ");
+				//System.out.print(arr[i].value + " ");
 			}
-			System.out.println();
+			//System.out.println();
 			boolean found = false;
 			for(int i = 0 ; i < n - 1 ; i++){
 				if(i == 0){
@@ -67,14 +77,14 @@ public class AlternateBPlusTree {
 				break;
 			}
 		}
-		System.out.println("Depth : " + depth++);
+		//System.out.println("Depth : " + depth++);
 		
 		PointerKey arr[] = C.getArr();
-		System.out.println("Value: ");
+		//System.out.println("Value: ");
 		for(int i = 0 ; i < C.getNumberOfValue() ; i++){
-			System.out.print(arr[i].value + " ");
+			//System.out.print(arr[i].value + " ");
 		}
-		System.out.println();
+		//System.out.println();
 		return C;
 	}
 	public void insert(int K, Node P){
