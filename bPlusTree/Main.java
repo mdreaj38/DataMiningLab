@@ -28,7 +28,7 @@ public class Main {
 			int command = s.nextInt();
 			if(command == 2) bpt.print();
 			else if(command == 1){
-				int value = s.nextInt();
+				String value = s.next();
 				bpt.insert(value, null);
 			}
 			System.out.println();
@@ -37,5 +37,6 @@ public class Main {
 		System.out.println("starting find()");
 		//bpt.find(12);
 		bpt.print();
+		s.close();
 	}
 }

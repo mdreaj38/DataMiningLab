@@ -2,7 +2,7 @@ package DataMiningLab.bPlusTree;
 
 import java.util.LinkedList;
 
-public class AlternateBPlusTree {
+public class AlternateBPlusTree<T extends Comparable<T>> {
 	
 	int n;
 	Node root;
@@ -44,50 +44,28 @@ public class AlternateBPlusTree {
 		}
 	}
 	
-	public Node find(int value){
+	public Node find(T value){
 		Node C = root;
-		int depth = 0;
 		while(!C.getIsLeafNode()){
-			//System.out.println("Depth : " + depth++);
-			
 			PointerKey arr[] = C.getArr();
-			//System.out.println("Value: ");
-			for(int i = 0 ; i < C.getNumberOfValue() ; i++){
-				//System.out.print(arr[i].value + " ");
-			}
-			//System.out.println();
-			boolean found = false;
-			for(int i = 0 ; i < n - 1 ; i++){
-				if(i == 0){
-					if(value < arr[i].value){
-						found = true;
-						C = arr[i].pointer;
-						break;
-					}
+			
+			for(int i = 0 ; i < n ; i++){
+				if(arr[i].value == null){
+					C = arr[i].pointer;
+					break;
 				}
-				else if(arr[i-1].value <= value && value < arr[i].value){
-					found = true;
+				//if(value < arr[i].value ){
+				if(value.compareTo((T)arr[i].value) < 0){
 					C = arr[i].pointer;
 					break;
 				}
 			}
-			if(!found && arr[n-2].value < value){
-				C = arr[n-1].pointer;
-				found = true;
-				break;
-			}
+			
+			
 		}
-		//System.out.println("Depth : " + depth++);
-		
-		PointerKey arr[] = C.getArr();
-		//System.out.println("Value: ");
-		for(int i = 0 ; i < C.getNumberOfValue() ; i++){
-			//System.out.print(arr[i].value + " ");
-		}
-		//System.out.println();
 		return C;
 	}
-	public void insert(int K, Node P){
+	public void insert(T K, Node P){
 		Node L = find(K);
 		if(L.getNumberOfValue() < n - 1 ){ // if there's space in the node
 			insertInLeaf(L,K,P);
@@ -113,19 +91,25 @@ public class AlternateBPlusTree {
 			L.arr[i].value = T.arr[i].value;
 			L.setNumberOfValue(i + 1);
 		}
-		int K_ = Integer.MAX_VALUE;
+		T K_ = null;
 		for(int i = (int)Math.ceil(n/2), j = 0 ; i < n ; i++, j++){
-			if(j == 0) K_ = T.arr[i].value;
+			if(j == 0) K_ = (T)T.arr[i].value;
 			L_.arr[j].pointer = T.arr[i].pointer;
 			L_.arr[j].value = T.arr[i].value;
 			L_.setNumberOfValue(j + 1);
 		}
 		insertInParent(L,K_,L_);
 	}
-	public void insertInLeaf(Node L, int K, Node P){
+	
+	public void insertInLeaf(Node L, T K, Node P){
 		PointerKey arr[] = L.getArr();
 		for(int i = 0 ; i < n ; i++){
-			if(K < arr[i].value){
+			if(arr[i].value == null){
+				arr[i].value = K;
+				arr[i].pointer = P;
+				break;
+			}
+			if(K.compareTo((T)arr[i].value) < 0){
 				for(int j = n-1; j > i ; j--){
 					arr[j].value = arr[j-1].value;
 					arr[j].pointer = arr[j-1].pointer;
@@ -138,7 +122,7 @@ public class AlternateBPlusTree {
 		L.setArr(arr);
 		
 	}
-	public void insertInParent(Node N, int K_, Node N_){
+	public void insertInParent(Node N, T K_, Node N_){
 		if(N == root){	//root of the tree
 			Node R = new Node(n);
 			R.arr[0].pointer = N;
@@ -203,10 +187,10 @@ public class AlternateBPlusTree {
 			P.arr[i].value = T.arr[i].value;
 			P.setNumberOfValue(i + 1);
 		}
-		int K__ = T.arr[(int)Math.ceil((n+1.0)/2)-1].value;
+		T K__ = (T)T.arr[(int)Math.ceil((n+1.0)/2)-1].value;
 		int j = 0;
 		for(int i = (int)Math.ceil((n+1.0)/2); i < n ; i++, j++){
-			if(j == 0) K_ = T.arr[i].value;
+			if(j == 0) K_ = (T)T.arr[i].value;
 			P_.arr[j].pointer = T.arr[i].pointer;
 			P_.arr[j].pointer.setParent(P_);
 			P_.arr[j].value = T.arr[i].value;

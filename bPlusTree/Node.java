@@ -1,9 +1,9 @@
 package DataMiningLab.bPlusTree;
 
-public class Node {
+public class Node<T extends Comparable <T>> {
 	int n;
 	int numberOfValue;
-	PointerKey arr[];
+	PointerKey<T> arr[];
 	Node parent;
 	boolean isLeafNode;
 	public Node(int n){
@@ -11,7 +11,7 @@ public class Node {
 		numberOfValue = 0;
 		arr = new PointerKey[n];
 		for(int i = 0 ; i < n ; i++){
-			arr[i] = new PointerKey(null, Integer.MAX_VALUE);
+			arr[i] = new PointerKey(null, null);
 		}
 		
 	}
