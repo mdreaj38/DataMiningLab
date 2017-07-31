@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Main {
 	public static void main(String args[]){
-		AlternateBPlusTree bpt = new AlternateBPlusTree(4);
+		BPlusTree bpt = new BPlusTree(4);
 		/*bpt.insert(11, null);
 		bpt.insert(12, null);
 		bpt.insert(9, null);

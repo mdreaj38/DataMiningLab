@@ -2,12 +2,12 @@ package DataMiningLab.bPlusTree;
 
 import java.util.LinkedList;
 
-public class AlternateBPlusTree<T extends Comparable<T>> {
+public class BPlusTree<T extends Comparable<T>> {
 	
 	int n;
 	Node root;
 	
-	public AlternateBPlusTree(int n){
+	public BPlusTree(int n){
 		this.n = n;
 		root = new Node(n);
 		root.setIsLeafNode(true);
