@@ -86,13 +86,13 @@ public class AlternateBPlusTree<T extends Comparable<T>> {
 		for(int i = 0 ; i < n-1; i++){
 			L.arr[i] = new PointerKey();
 		}
-		for(int i = 0 ; i < Math.ceil(n/2) ; i++){
+		for(int i = 0 ; i < Math.ceil(n/2.0) ; i++){
 			L.arr[i].pointer = T.arr[i].pointer;
 			L.arr[i].value = T.arr[i].value;
 			L.setNumberOfValue(i + 1);
 		}
 		T K_ = null;
-		for(int i = (int)Math.ceil(n/2), j = 0 ; i < n ; i++, j++){
+		for(int i = (int)Math.ceil(n/2.0), j = 0 ; i < n ; i++, j++){
 			if(j == 0) K_ = (T)T.arr[i].value;
 			L_.arr[j].pointer = T.arr[i].pointer;
 			L_.arr[j].value = T.arr[i].value;
@@ -172,11 +172,11 @@ public class AlternateBPlusTree<T extends Comparable<T>> {
 		}
 		//P = new Node(n);
 		for(int i = 0 ; i < n ; i++){
-			P.arr[i].value = Integer.MAX_VALUE;
+			P.arr[i].value = null;
 			P.arr[i].pointer = null;
 		}
 		Node P_ = new Node(n);
-		for(int i = 0 ; i < Math.ceil((n+1.0)/2) ; i++){
+		for(int i = 0 ; i < Math.ceil((n+1.0)/2.0) ; i++){
 			if(i == Math.ceil((n+1.0)/2) - 1){
 				P.arr[i].pointer = T.arr[i].pointer;
 				P.arr[i].pointer.setParent(P);
@@ -187,9 +187,9 @@ public class AlternateBPlusTree<T extends Comparable<T>> {
 			P.arr[i].value = T.arr[i].value;
 			P.setNumberOfValue(i + 1);
 		}
-		T K__ = (T)T.arr[(int)Math.ceil((n+1.0)/2)-1].value;
+		T K__ = (T)T.arr[(int)Math.ceil((n+1.0)/2.0)-1].value;
 		int j = 0;
-		for(int i = (int)Math.ceil((n+1.0)/2); i < n ; i++, j++){
+		for(int i = (int)Math.ceil((n+1.0)/2.0); i < n ; i++, j++){
 			if(j == 0) K_ = (T)T.arr[i].value;
 			P_.arr[j].pointer = T.arr[i].pointer;
 			P_.arr[j].pointer.setParent(P_);
