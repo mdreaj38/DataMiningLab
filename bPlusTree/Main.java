@@ -22,14 +22,19 @@ public class Main {
 		
 		System.out.println("commands");
 		System.out.println("insert: 1 value");
-		System.out.println("show tree : 2");
+		System.out.println("delete: 2 value");
+		System.out.println("show tree : 3");
 		
 		while(s.hasNextInt()){
 			int command = s.nextInt();
-			if(command == 2) bpt.print();
+			if(command == 3) bpt.print();
 			else if(command == 1){
 				String value = s.next();
 				bpt.insert(value, null);
+			}
+			else if(command == 2){
+				String value = s.next();
+				bpt.delete(value, null);
 			}
 			System.out.println();
 		}

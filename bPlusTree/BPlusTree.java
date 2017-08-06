@@ -51,11 +51,14 @@ public class BPlusTree<T extends Comparable<T>> {
 			
 			for(int i = 0 ; i < n ; i++){
 				if(arr[i].value == null){
+					arr[i].pointer.parent = C;
 					C = arr[i].pointer;
+					
 					break;
 				}
 				//if(value < arr[i].value ){
 				if(value.compareTo((T)arr[i].value) < 0){
+					arr[i].pointer.parent = C;
 					C = arr[i].pointer;
 					break;
 				}
@@ -199,5 +202,122 @@ public class BPlusTree<T extends Comparable<T>> {
 		P_.arr[j].pointer = T.arr[n].pointer;
 		P_.arr[j].pointer.setParent(P_);
 		insertInParent(P,K__,P_);
+	}
+	
+	public void delete(T K, Node P){
+		Node X = find(K);
+		if(X == null) return;
+		delete_entry(X, K, P);
+	}
+	public void delete_entry(Node N, T K, Node P){
+		N.delete(new PointerKey(P,K));
+		if(N == root && N.numberOfValue == 0 && N.arr[0].pointer != null){
+			root = N.arr[0].pointer;
+			root.setParent(null);
+		}
+		
+		else if(N.numberOfValue < Math.ceil((n-1)/2.0)){
+			int pos = 0;
+			for(; N.parent.arr[pos].pointer != N; pos++);
+			//PointerKey left = new PointerKey(null,null);
+			//PointerKey right = new PointerKey(null, null);
+			Node LeftN = null, RightN = null;
+			T LeftK = null, RightK = null;
+			if(pos != 0){
+				//left = new PointerKey(, );
+				LeftN = N.parent.arr[pos-1].pointer;
+				LeftK = (T) N.parent.arr[pos-1].value;
+				LeftN.setParent(N.parent);
+			}
+			if(pos != N.parent.numberOfValue){
+				RightN = N.parent.arr[pos+1].pointer;
+				RightK = (T) N.parent.arr[pos].value;
+				RightN.setParent(N.parent);
+			}
+			//coalesce
+			if(LeftN!=null&&((N.isLeafNode&&LeftN.numberOfValue+N.numberOfValue<n)||
+					(!N.isLeafNode&&LeftN.numberOfValue+N.numberOfValue+2<=n))) {
+				coalesce(N,LeftN, (T) LeftK);
+				return;
+			}
+			else if(RightN!=null&&((N.isLeafNode&&RightN.numberOfValue+N.numberOfValue<n)||
+					(!N.isLeafNode&&RightN.numberOfValue+N.numberOfValue+2<=n))){
+				coalesce(RightN, N, (T) RightK);
+				return;
+			}
+			//redistribution
+			else if(LeftN!=null&&LeftN.numberOfValue>(int)Math.ceil((n-1)/2.0)) {
+				redistFromLeft(N,LeftN,(T) LeftK,pos-1);
+				return;
+			}
+			else if(RightN!=null&&RightN.numberOfValue>(int)Math.ceil((n-1)/2.0)) {
+				redistFromRight(N,RightN,(T) RightK,pos);
+				return;
+			}
+		}
+	}
+	public void coalesce(Node N, Node NN, T KK){
+		if(!N.isLeafNode) {
+			NN.arr[NN.numberOfValue].value = KK;
+			NN.numberOfValue++;
+			for(int i=0;i<N.numberOfValue;i++) {
+				NN.arr[NN.numberOfValue].pointer = N.arr[i].pointer;
+				NN.arr[NN.numberOfValue].value = N.arr[i].value;
+				NN.numberOfValue++;
+			}
+			NN.arr[NN.numberOfValue].pointer = N.arr[N.numberOfValue].pointer;
+		}
+		else {
+			for(int i=0;i<N.numberOfValue;i++) {
+				NN.arr[NN.numberOfValue].pointer = N.arr[i].pointer;
+				NN.arr[NN.numberOfValue].value = N.arr[i].value;
+				NN.numberOfValue++;
+			}
+			NN.arr[n-1].pointer = N.arr[n-1].pointer;
+		}
+		delete_entry(N.parent,KK,N);
+		N.parent = null;
+		
+		for(int i = 0 ; i < n; i++){
+			N.arr[i] = new PointerKey(null, null);
+		}
+	}
+	
+	public void redistFromLeft(Node N,Node NN,T KK,int pos) {
+		if(!N.isLeafNode) {
+			int m = NN.numberOfValue;		//Final pointer of NN
+			T lastKey = (T) NN.arr[m-1].value;
+			N.insert(0, KK , NN.arr[m].pointer);
+			Node temp = N.arr[0].pointer;
+			N.arr[0].pointer = N.arr[1].pointer;
+			N.arr[1].pointer = temp;
+			NN.delete(new PointerKey(NN.arr[m].pointer,lastKey) );
+			N.parent.arr[pos].value = lastKey;
+			
+		}
+		else {
+			int m = NN.numberOfValue-1;
+			T lastKey = (T) NN.arr[m].value;
+			N.insert(0, lastKey, NN.arr[m].pointer);
+			NN.delete(new PointerKey(NN.arr[m].pointer, lastKey));
+			N.parent.arr[pos].value = lastKey;
+		}
+	}
+	
+	public void redistFromRight(Node N,Node NN,T KK,int pos) {
+		if(!N.isLeafNode) {
+			int m = NN.numberOfValue;		//Final pointer of NN
+			T firstKey = (T) NN.arr[0].value;
+			N.insert(m, KK, NN.arr[0].pointer);
+			NN.delete(new PointerKey(NN.arr[0].pointer,firstKey) );
+			N.parent.arr[pos].value = firstKey;
+		}
+		else {
+			int m = N.numberOfValue;
+			T firstKey = (T) NN.arr[0].pointer;
+			N.insert(m, firstKey, NN.arr[0].pointer);
+			NN.delete(new PointerKey(NN.arr[0].pointer, firstKey));
+			N.parent.arr[pos].value = firstKey;
+		}
 	}
 }

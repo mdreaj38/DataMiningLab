@@ -3,6 +3,7 @@ package DataMiningLab.bPlusTree;
 public class PointerKey<T extends Comparable<T>> {
 	Node pointer;
 	T value;
+	Node parent;
 	public PointerKey(){
 		this.pointer = null;
 		this.value = null;
@@ -18,4 +19,5 @@ public class PointerKey<T extends Comparable<T>> {
 	}
 	public Node getPointer(){ return pointer; }
 	public T getValue() { return value; }
+	public void setParent(Node parent){ this.parent = parent;}
 }

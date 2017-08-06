@@ -15,6 +15,47 @@ public class Node<T extends Comparable <T>> {
 		}
 		
 	}
+	
+	public void insert(int pos,T V,Node N) {
+		if(this.isLeafNode) {
+			for(int i=numberOfValue-1;i>=pos;i--) {
+				arr[i+1].pointer = arr[i].pointer;
+				arr[i+1].value = arr[i].value;
+			}
+			arr[pos].pointer = N;
+			arr[pos].value = V;
+			numberOfValue++;
+		}
+		else {
+			for(int i=numberOfValue-1;i>=pos;i--) {
+				arr[i+2].pointer = arr[i+1].pointer;
+				arr[i+1].value = arr[i].value;
+			}
+			arr[pos+1].pointer = N;
+			arr[pos].value = V;
+			numberOfValue++;
+		}
+	}
+	
+	public void delete(PointerKey P){
+		for(int i = 0 ; i < numberOfValue; i++){
+			if(P.value.compareTo(arr[i].value) == 0){
+				for(int j = i ; j < numberOfValue ; j++){
+					arr[j].value = arr[j+1].value;
+				}
+				break;
+			}
+		}
+		for(int i = 0 ; i < numberOfValue; i++){
+			if(P.pointer == arr[i].pointer){
+				for(int j = i ; j < numberOfValue ; j++){
+					arr[j].pointer = arr[j+1].pointer;
+				}
+			}
+		}
+		numberOfValue--;
+	}
+	
 	public void setParent(Node parent){ this.parent = parent; }
 	public Node getParent(){ return parent; }
 	
