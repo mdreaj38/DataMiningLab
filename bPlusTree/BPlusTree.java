@@ -216,7 +216,7 @@ public class BPlusTree<T extends Comparable<T>> {
 			root.setParent(null);
 		}
 		
-		else if(N.numberOfValue < Math.ceil((n-1)/2.0)){
+		else if(N != root && N.numberOfValue < Math.ceil((n-1)/2.0)){
 			int pos = 0;
 			for(; N.parent.arr[pos].pointer != N; pos++);
 			//PointerKey left = new PointerKey(null,null);
@@ -256,26 +256,26 @@ public class BPlusTree<T extends Comparable<T>> {
 			}
 		}
 	}
-	public void coalesce(Node N, Node NN, T KK){
+	public void coalesce(Node N, Node n_, T k_){
 		if(!N.isLeafNode) {
-			NN.arr[NN.numberOfValue].value = KK;
-			NN.numberOfValue++;
+			n_.arr[n_.numberOfValue].value = k_;
+			n_.numberOfValue++;
 			for(int i=0;i<N.numberOfValue;i++) {
-				NN.arr[NN.numberOfValue].pointer = N.arr[i].pointer;
-				NN.arr[NN.numberOfValue].value = N.arr[i].value;
-				NN.numberOfValue++;
+				n_.arr[n_.numberOfValue].pointer = N.arr[i].pointer;
+				n_.arr[n_.numberOfValue].value = N.arr[i].value;
+				n_.numberOfValue++;
 			}
-			NN.arr[NN.numberOfValue].pointer = N.arr[N.numberOfValue].pointer;
+			n_.arr[n_.numberOfValue].pointer = N.arr[N.numberOfValue].pointer;
 		}
 		else {
 			for(int i=0;i<N.numberOfValue;i++) {
-				NN.arr[NN.numberOfValue].pointer = N.arr[i].pointer;
-				NN.arr[NN.numberOfValue].value = N.arr[i].value;
-				NN.numberOfValue++;
+				n_.arr[n_.numberOfValue].pointer = N.arr[i].pointer;
+				n_.arr[n_.numberOfValue].value = N.arr[i].value;
+				n_.numberOfValue++;
 			}
-			NN.arr[n-1].pointer = N.arr[n-1].pointer;
+			n_.arr[n-1].pointer = N.arr[n-1].pointer;
 		}
-		delete_entry(N.parent,KK,N);
+		delete_entry(N.parent,k_,N);
 		N.parent = null;
 		
 		for(int i = 0 ; i < n; i++){
@@ -283,40 +283,40 @@ public class BPlusTree<T extends Comparable<T>> {
 		}
 	}
 	
-	public void redistFromLeft(Node N,Node NN,T KK,int pos) {
+	public void redistFromLeft(Node N,Node n_,T k_,int pos) {
 		if(!N.isLeafNode) {
-			int m = NN.numberOfValue;		//Final pointer of NN
-			T lastKey = (T) NN.arr[m-1].value;
-			N.insert(0, KK , NN.arr[m].pointer);
+			int m = n_.numberOfValue;		
+			T lastKey = (T) n_.arr[m-1].value;
+			N.insert(0, k_ , n_.arr[m].pointer);
 			Node temp = N.arr[0].pointer;
 			N.arr[0].pointer = N.arr[1].pointer;
 			N.arr[1].pointer = temp;
-			NN.delete(new PointerKey(NN.arr[m].pointer,lastKey) );
+			n_.delete(new PointerKey(n_.arr[m].pointer,lastKey) );
 			N.parent.arr[pos].value = lastKey;
 			
 		}
 		else {
-			int m = NN.numberOfValue-1;
-			T lastKey = (T) NN.arr[m].value;
-			N.insert(0, lastKey, NN.arr[m].pointer);
-			NN.delete(new PointerKey(NN.arr[m].pointer, lastKey));
+			int m = n_.numberOfValue-1;
+			T lastKey = (T) n_.arr[m].value;
+			N.insert(0, lastKey, n_.arr[m].pointer);
+			n_.delete(new PointerKey(n_.arr[m].pointer, lastKey));
 			N.parent.arr[pos].value = lastKey;
 		}
 	}
 	
-	public void redistFromRight(Node N,Node NN,T KK,int pos) {
+	public void redistFromRight(Node N,Node n_,T k_,int pos) {
 		if(!N.isLeafNode) {
-			int m = NN.numberOfValue;		//Final pointer of NN
-			T firstKey = (T) NN.arr[0].value;
-			N.insert(m, KK, NN.arr[0].pointer);
-			NN.delete(new PointerKey(NN.arr[0].pointer,firstKey) );
+			int m = n_.numberOfValue;		
+			T firstKey = (T) n_.arr[0].value;
+			N.insert(m, k_, n_.arr[0].pointer);
+			n_.delete(new PointerKey(n_.arr[0].pointer,firstKey) );
 			N.parent.arr[pos].value = firstKey;
 		}
 		else {
 			int m = N.numberOfValue;
-			T firstKey = (T) NN.arr[0].pointer;
-			N.insert(m, firstKey, NN.arr[0].pointer);
-			NN.delete(new PointerKey(NN.arr[0].pointer, firstKey));
+			T firstKey = (T) n_.arr[0].pointer;
+			N.insert(m, firstKey, n_.arr[0].pointer);
+			n_.delete(new PointerKey(n_.arr[0].pointer, firstKey));
 			N.parent.arr[pos].value = firstKey;
 		}
 	}

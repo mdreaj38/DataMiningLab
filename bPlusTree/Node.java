@@ -38,8 +38,10 @@ public class Node<T extends Comparable <T>> {
 	}
 	
 	public void delete(PointerKey P){
+		boolean found = false;
 		for(int i = 0 ; i < numberOfValue; i++){
 			if(P.value.compareTo(arr[i].value) == 0){
+				found = true;
 				for(int j = i ; j < numberOfValue ; j++){
 					arr[j].value = arr[j+1].value;
 				}
@@ -53,7 +55,8 @@ public class Node<T extends Comparable <T>> {
 				}
 			}
 		}
-		numberOfValue--;
+		if(found)
+			numberOfValue--;
 	}
 	
 	public void setParent(Node parent){ this.parent = parent; }
