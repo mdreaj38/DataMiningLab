@@ -313,7 +313,7 @@ public class BPlusTree<T extends Comparable<T>> {
 	
 	public void redistFromRight(Node N,Node n_,T k_,int pos) {
 		if(!N.getIsLeafNode()) {
-			int m = n_.getNumberOfValue();		
+			int m = N.getNumberOfValue();		
 			T firstKey = (T) n_.getArrPointerKey(0).getValue();
 			N.insert(m, k_, n_.getArrPointerKey(0).getPointer());
 			n_.delete(new PointerKey(n_.getArrPointerKey(0).getPointer(),firstKey) );
