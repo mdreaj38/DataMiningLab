@@ -1,11 +1,11 @@
 package DataMiningLab.bPlusTree;
 
 public class Node<T extends Comparable <T>> {
-	int n;
-	int numberOfValue;
-	PointerKey<T> arr[];
-	Node parent;
-	boolean isLeafNode;
+	private int n;
+	private int numberOfValue;
+	private PointerKey<T> arr[];
+	private Node parent;
+	private boolean isLeafNode;
 	public Node(int n){
 		this.n = n;
 		numberOfValue = 0;
@@ -19,20 +19,20 @@ public class Node<T extends Comparable <T>> {
 	public void insert(int pos,T V,Node N) {
 		if(this.isLeafNode) {
 			for(int i=numberOfValue-1;i>=pos;i--) {
-				arr[i+1].pointer = arr[i].pointer;
-				arr[i+1].value = arr[i].value;
+				arr[i+1].setPointer(arr[i].getPointer());
+				arr[i+1].setValue(arr[i].getValue());
 			}
-			arr[pos].pointer = N;
-			arr[pos].value = V;
+			arr[pos].setPointer(N);
+			arr[pos].setValue(V);
 			numberOfValue++;
 		}
 		else {
 			for(int i=numberOfValue-1;i>=pos;i--) {
-				arr[i+2].pointer = arr[i+1].pointer;
-				arr[i+1].value = arr[i].value;
+				arr[i+1].setPointer(arr[i+1].getPointer());
+				arr[i+1].setValue(arr[i].getValue());
 			}
-			arr[pos+1].pointer = N;
-			arr[pos].value = V;
+			arr[pos+1].setPointer(N);
+			arr[pos].setValue(V);
 			numberOfValue++;
 		}
 	}
@@ -40,18 +40,18 @@ public class Node<T extends Comparable <T>> {
 	public void delete(PointerKey P){
 		boolean found = false;
 		for(int i = 0 ; i < numberOfValue; i++){
-			if(P.value.compareTo(arr[i].value) == 0){
+			if(P.getValue().compareTo(arr[i].getValue()) == 0){
 				found = true;
 				for(int j = i ; j < numberOfValue ; j++){
-					arr[j].value = arr[j+1].value;
+					arr[j].setValue(arr[j+1].getValue());
 				}
 				break;
 			}
 		}
 		for(int i = 0 ; i < numberOfValue; i++){
-			if(P.pointer == arr[i].pointer){
+			if(P.getPointer() == arr[i].getPointer()){
 				for(int j = i ; j < numberOfValue ; j++){
-					arr[j].pointer = arr[j+1].pointer;
+					arr[j].setPointer(arr[j+1].getPointer());
 				}
 			}
 		}
@@ -64,6 +64,9 @@ public class Node<T extends Comparable <T>> {
 	
 	public void setIsLeafNode(boolean isLeafNode){ this.isLeafNode = isLeafNode;}
 	public boolean getIsLeafNode() { return isLeafNode; }
+	
+	public void setArrPointerKey(int index, PointerKey pk){ arr[index] = pk; }
+	public PointerKey getArrPointerKey(int index) { return arr[index]; }
 	
 	public void setArr(PointerKey arr[]) { this.arr = arr;}
 	public PointerKey[] getArr(){ return arr; }
