@@ -89,10 +89,10 @@ public class DynamicHashing {
 				int tempH = h(temp);
 				String tempHBin = bc.decToBin(tempH, bits);
 				if(index2.equals(tempHBin.substring(0, index2.length()))){
-					newBucket2.insertInBucket(tempH);
+					newBucket2.insertInBucket(temp);
 				}
 				else{
-					newBucket1.insertInBucket(tempH);
+					newBucket1.insertInBucket(temp);
 				}
 			}
 			for(int i = lowerLimit ; i < middle ; i++) buckets[i] = newBucket1;
