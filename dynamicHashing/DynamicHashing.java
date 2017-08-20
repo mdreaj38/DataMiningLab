@@ -96,7 +96,7 @@ public class DynamicHashing {
 				}
 			}
 			for(int i = lowerLimit ; i < middle ; i++) buckets[i] = newBucket1;
-			for(int i = middle; i < upperLimit; i++) buckets[i] = newBucket2;
+			for(int i = middle; i <= upperLimit; i++) buckets[i] = newBucket2;
 			insert(num);
 		}
 		else{
