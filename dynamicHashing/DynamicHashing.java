@@ -23,8 +23,9 @@ public class DynamicHashing {
 	
 	public void insert(int num){
 		int index = h(num);
-		String id = bc.decToBin(index, bits).substring(0, identity);
-		if(identity == 0){
+		String id = bc.decToBin(index, bits).substring(0, identity);//get binary representation of hash of length
+																	//same as global I
+		if(identity == 0){	//If global I is 0, then ID will null string, can't convert to int to find out index
 			if(sizeOfBucket == buckets[0].getSize()){
 				redistribute(num, buckets,0);
 			}
@@ -43,8 +44,13 @@ public class DynamicHashing {
 	public void redistribute(int num, Bucket[] oldBucket, int index){
 		if(identity == oldBucket[index].getI()){
 			identity++;
+			if (identity > bits){
+				System.err.println("Overflow Detected");
+				identity--;
+				return;
+			}
 			//noOfBuckets = (int)Math.pow(2, identity);
-			Bucket[] newBucket = new Bucket[(int)Math.pow(2, identity)];
+			Bucket[] newBucket = new Bucket[(int)Math.pow(2, identity)];	//double bucket size and replace 1 entry with 2
 			for(int i = 0, j =0 ; i < (int)Math.pow(2, identity); i+=2, j++){
 				newBucket[i] = newBucket[i+1] = oldBucket[j];
 			}
@@ -53,7 +59,7 @@ public class DynamicHashing {
 			String index2 = idx + "1";
 			newBucket[bc.binToDec(index1)] = new Bucket(index1);
 			newBucket[bc.binToDec(index2)] = new Bucket(index2);
-			for(int i = 0 ; i < oldBucket[index].getSize(); i++){
+			for(int i = 0 ; i < oldBucket[index].getSize(); i++){	//redistribute the new buckets
 				int temp = oldBucket[index].getBucketContent(i);
 				newBucket[bc
 				        .binToDec(bc.decToBin(h(temp), bits)
@@ -63,9 +69,8 @@ public class DynamicHashing {
 			insert(num);
 		}
 		else if(identity > oldBucket[index].getI()){
-			System.out.println("entered");
 			int lowerLimit = 0;
-			int upperLimit = (int)Math.pow(2, identity);
+			int upperLimit = (int)Math.pow(2, identity)-1;	//find the middle point of indices that point to same bucket
 			for(int i = index; i >= 0; i--){
 				if(oldBucket[index] != oldBucket[i]){
 					lowerLimit = i+1;
@@ -79,7 +84,7 @@ public class DynamicHashing {
 				}
 			}
 			int middle = (int)Math.ceil((upperLimit + lowerLimit)/2.0);
-			String idx = oldBucket[index].getHeader();
+			String idx = oldBucket[index].getHeader();	//redistribute the buckets to newly found bucket
 			String index1 = idx + "0";
 			String index2 = idx + "1";
 			Bucket newBucket1 = new Bucket(index1);
@@ -104,27 +109,15 @@ public class DynamicHashing {
 		}
 	}
 	
-	public void redistribute(Bucket bucket){
-		String index = bucket.getHeader();
-		String index1 = index + "0";
-		String index2 = index + "1";
-		buckets[bc.binToDec(index1)] = new Bucket(index1);
-		buckets[bc.binToDec(index2)] = new Bucket(index2);
-		for(int i = 0 ; i < bucket.getSize(); i++){
-			int temp = bucket.getBucketContent(i);
-			int idx = h(temp);
-			String id = bc.decToBin(idx, bits).substring(0, identity);
-			idx = bc.binToDec(id);
-			buckets[idx].insertInBucket(temp);
-		}
-		//bucket.empty();
-	}
-	
 	public void show(){
+		System.out.println("["+ identity+"]:");
 		for(int i = 0 ; i < (int)Math.pow(2,identity); i++){
 			Bucket bucket = buckets[i];
-			System.out.println("["+i+"]:");
-			System.out.println("bucket (" + bucket.getHeader() + "):");
+			if(i != 0 && bucket == buckets[i-1]) continue;
+			//System.out.println("["+i+"]:");
+			
+			System.out.print("bucket (" + bucket.getHeader() + "): ");
+			System.out.println("["+ bucket.getHeader().length()+ "]");
 			for(int j = 0 ; j < bucket.getSize() ; j++){
 				System.out.println(bucket.getBucketContent(j));
 				

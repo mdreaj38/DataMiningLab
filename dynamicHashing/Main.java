@@ -14,7 +14,7 @@ public class Main {
 				dh.insert(value);
 			}
 			else if(command == 2){
-				System.out.println("Bucket so far");
+				//System.out.println("Bucket so far");
 				dh.show();
 			}
 		}
