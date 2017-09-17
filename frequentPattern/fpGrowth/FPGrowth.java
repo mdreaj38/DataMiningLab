@@ -12,13 +12,16 @@ public class FPGrowth {
 	ArrayList < ArrayList <Integer> > transaction;
 	ArrayList <FPNode> L;
 	int MIN_SUP = 2;
+	double min_sup_perc = 0.01;
+	int total_count = 0;
 	
 	public FPGrowth() throws FileNotFoundException{
 		transaction = new ArrayList<ArrayList<Integer>>();
 		L = new ArrayList<FPNode>();
 		init();
 		preProcess();
-		new FPTreeGen(L,transaction);
+		MIN_SUP = (int)(transaction.size() * min_sup_perc);
+		new FPTreeGen(L,transaction,MIN_SUP);
 	}
 	private void preProcess(){
 		HashMap<Integer, Integer> hm = new HashMap<Integer,Integer>();
@@ -51,14 +54,16 @@ public class FPGrowth {
 	}
 	
 	private void init() throws FileNotFoundException{
-		Scanner s = new Scanner(new File("transaction.txt"));
+		Scanner s = new Scanner(new File("retail.txt"));
 		while(s.hasNextLine()){
 			Scanner s_ind = new Scanner(s.nextLine());
 			ArrayList <Integer> i_temp = new ArrayList<Integer>();
 			while(s_ind.hasNextInt()){
 				i_temp.add(s_ind.nextInt());
+				
 			}
 			transaction.add(i_temp);
+			
 			s_ind.close();
 		}
 		s.close();

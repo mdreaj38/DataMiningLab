@@ -11,12 +11,13 @@ public class FPTreeGen {
 	private ArrayList<FPNode> L;
 	private ArrayList <ArrayList<Integer>> Transaction;
 	private HashMap<String , ArrayList<generatedFP>> genFP;
-	int MIN_SUP = 2;
+	private int MIN_SUP;
 	
 	
-	public FPTreeGen(ArrayList<FPNode> L, ArrayList <ArrayList<Integer>> Transaction){
+	public FPTreeGen(ArrayList<FPNode> L, ArrayList <ArrayList<Integer>> Transaction,int MIN_SUP){
 		this.L = L;
 		this.Transaction = Transaction;
+		this.MIN_SUP = MIN_SUP;
 		root = new FPNode(null,0,null);
 		genFP = new HashMap <String, ArrayList<generatedFP>>();
 		for(FPNode x : L){
