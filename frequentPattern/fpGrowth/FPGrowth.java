@@ -54,7 +54,7 @@ public class FPGrowth {
 	}
 	
 	private void init() throws FileNotFoundException{
-		Scanner s = new Scanner(new File("retail.txt"));
+		Scanner s = new Scanner(new File("akash.txt"));
 		while(s.hasNextLine()){
 			Scanner s_ind = new Scanner(s.nextLine());
 			ArrayList <Integer> i_temp = new ArrayList<Integer>();

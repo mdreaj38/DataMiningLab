@@ -30,18 +30,19 @@ public class FPTreeGen {
 	public void FP_Growth(FPNode root, ArrayList<FPNode> alpha, ArrayList <FPNode> L){
 		
 		if(!hasMultiPath(root)){ //Tree contains a single Path.
-			ArrayList <String> nodes = new ArrayList<String>();
-			int sup = Integer.MAX_VALUE;
+			ArrayList <FPNode> nodes = new ArrayList<FPNode>();
 			do{
 				root = root.getChild(0);
-				nodes.add(root.getID());
-				if(sup > root.getCount()) sup = root.getCount();
+				nodes.add(root);
+				//if(sup > root.getCount()) sup = root.getCount();
 			}while(root.getChildrenCount() != 0);
-			ArrayList <String> combi = createCombination(nodes);
-			for(String y : combi){
-				String temp = y;
+			ArrayList <GeneralPair<String,Integer>> combi = createCombination(nodes);
+			for(GeneralPair<String,Integer> y : combi){
+				String temp = y.getT();
+				int sup = y.getP();
 				for(FPNode x : alpha){
 					temp += ", " + x.getID();
+					
 				}
 				System.out.println("{"+temp + ":" + sup +"}");
 			}
@@ -85,28 +86,30 @@ public class FPTreeGen {
 			}
 		}
 	}
-	private ArrayList<String> createCombination(ArrayList<String> nodes){
-		ArrayList <String> combi = new ArrayList<String>();
+	private ArrayList<GeneralPair<String,Integer>> createCombination(ArrayList<FPNode> nodes){
+		ArrayList <GeneralPair<String,Integer>> combi = new ArrayList<GeneralPair<String,Integer>>();
 		int max = (1 << nodes.size());
 		for(int i = 1 ; i < max ; i++){
 			int temp = i;
 			int index  = 0;
 			boolean first = false;
 			String c = "";
+			int min = Integer.MAX_VALUE;
 			while(temp != 0){
 				if((temp&1)!=0){
 					if(!first){
-						c += nodes.get(index);
+						c += nodes.get(index).getID();
 						first = true;
 					}
 					else 
-						c += ", " + nodes.get(index);
+						c += ", " + nodes.get(index).getID();
+					if(min > nodes.get(index).getCount()) min = nodes.get(index).getCount();
 				}
 				index++;
 				temp = temp >> 1;
 			}
 			
-			combi.add(c);
+			combi.add(new GeneralPair<String,Integer>(c, min));
 		}
 		return combi;
 	}
@@ -221,6 +224,16 @@ public class FPTreeGen {
 		public int getSupportCount() { return supportCount; }
 		public int getNode(int index) { return nodes.get(index); }
 		
+	}
+	private class GeneralPair<T,P>{
+		private T t;
+		private P p;
+		public GeneralPair(T t,P p){
+			this.t = t;
+			this.p = p;
+		}
+		public T getT(){return t;}
+		public P getP(){return p;}
 	}
 	private class Pair{
 		private ArrayList<String> items;
