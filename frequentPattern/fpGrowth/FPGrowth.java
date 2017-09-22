@@ -9,18 +9,19 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class FPGrowth {
-	ArrayList < ArrayList <Integer> > transaction;
-	ArrayList <FPNode> L;
-	int MIN_SUP = 2;
-	double min_sup_perc = 0.01;
-	int total_count = 0;
+	private ArrayList < ArrayList <Integer> > transaction;
+	private ArrayList <FPNode> L;
+	private int MIN_SUP = 2;
+	private double min_sup_perc = 0.01;
+	private String filename;
 	
-	public FPGrowth() throws FileNotFoundException{
+	public FPGrowth(String filename) throws FileNotFoundException{
+		this.filename = filename;
 		transaction = new ArrayList<ArrayList<Integer>>();
 		L = new ArrayList<FPNode>();
 		init();
 		preProcess();
-		MIN_SUP = (int)(transaction.size() * min_sup_perc);
+		//MIN_SUP = (int)(transaction.size() * min_sup_perc);
 		new FPTreeGen(L,transaction,MIN_SUP);
 	}
 	private void preProcess(){
@@ -54,7 +55,7 @@ public class FPGrowth {
 	}
 	
 	private void init() throws FileNotFoundException{
-		Scanner s = new Scanner(new File("akash.txt"));
+		Scanner s = new Scanner(new File(filename));
 		while(s.hasNextLine()){
 			Scanner s_ind = new Scanner(s.nextLine());
 			ArrayList <Integer> i_temp = new ArrayList<Integer>();
