@@ -12,7 +12,7 @@ public class FPGrowth {
 	private ArrayList < ArrayList <Integer> > transaction;
 	private ArrayList <FPNode> L;
 	private int MIN_SUP = 2;
-	private double min_sup_perc = 0.6;
+	private double min_sup_perc = 0.001;
 	private String filename;
 	
 	public FPGrowth(String filename) throws FileNotFoundException{

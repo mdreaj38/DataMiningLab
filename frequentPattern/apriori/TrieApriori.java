@@ -5,13 +5,15 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class TrieApriori {
 	private TrieNode root;
 	private ArrayList <ArrayList<Integer>> transactions;
 	private int MIN_SUP = 2;
-	private double min_sup_perc = 0.6;
+	private double min_sup_perc = 0.001;
 	private String filename;
 	public TrieApriori(String filename){
 		this.filename = filename;
@@ -19,6 +21,7 @@ public class TrieApriori {
 		transactions = new ArrayList <ArrayList<Integer>> ();
 		init();
 		MIN_SUP = (int)(transactions.size() * min_sup_perc);
+		preProcess();
 		int depth = triepriori(1);
 		for(int i = 2 ; i < depth; i++){
 			mine(i,"",0,root);
@@ -31,16 +34,12 @@ public class TrieApriori {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		ArrayList <Integer> temp_nodes = new ArrayList<Integer>();
 		while(s.hasNextLine()){
 			Scanner s_temp = new Scanner(s.nextLine());
 			ArrayList<Integer> temp_trans = new ArrayList <Integer>();
 			while(s_temp.hasNextInt()){
 				int temp_int = s_temp.nextInt();
 				temp_trans.add(temp_int);
-				if(!temp_nodes.contains(temp_int)){
-					temp_nodes.add(temp_int);
-				}
 			}
 			s_temp.close();
 			transactions.add(temp_trans);
@@ -55,21 +54,11 @@ public class TrieApriori {
 				
 			});
 		}
-		temp_nodes.sort(new Comparator<Integer>(){
-			@Override
-			public int compare(Integer o1, Integer o2) {
-				return o1-o2;
-			}
-			
-		});
-		for(int x : temp_nodes){
-			root.addChild(new TrieNode(x+"",0,root));
-		}
-		
 	}
 	private int triepriori(int k){
 		System.out.println("running: "+k);
-		traverse_database(k);
+		if(k != 1)
+			traverse_database(k);
 		if(candidateGeneration(k) != 0)
 			return triepriori(k+1);
 		return k;
@@ -113,17 +102,11 @@ public class TrieApriori {
 				tempNode = tempNode.getParent();
 			}
 			Collections.reverse(path);
-			//ArrayList<ArrayList<Integer>> combination = createCombination(k+1, path);
 			if(path.size() != 1)
 				for(int index = 0 ; index < path.size(); index++){
 					if(!traverseTrie(path,index)) 
 						removableIndex.add(i);
 				}
-			/*for(ArrayList <Integer> x : combination){
-				if(!traverseTrie(x,-1)){
-					removableIndex.add(i);
-				}
-			}*/
 		}
 		for(int i = removableIndex.size() -1 ; i>= 0 ; i--){
 			node.removeChild(i);
@@ -148,8 +131,10 @@ public class TrieApriori {
 	}
 	
 	private void traverse_database(int k){
+		//int row = 0;
 		for(ArrayList<Integer> x : transactions){		//read the database
 			addTransaction(x,k,root,0,0);
+			//System.out.println(row++);
 		}
 		//run a dfs for level k, and remove any node that is less than min_sup
 		removeUnworthyNode(k, root, 0);
@@ -170,7 +155,6 @@ public class TrieApriori {
 	private TrieNode removeUnworthyNode(int k, TrieNode node,int depth){
 		if(depth == k){
 			if(node.getCount() < MIN_SUP){
-				//node.getParent().removeChild(node);
 				return node;
 			}
 			return null;
@@ -184,26 +168,37 @@ public class TrieApriori {
 		for(TrieNode x: toBeRemoved) node.removeChild(x);
 		return null;
 	}
-	private ArrayList<ArrayList <Integer>> createCombination(int k, ArrayList <Integer> trans_slice){
-		ArrayList<ArrayList <Integer>> combi = new ArrayList<ArrayList <Integer>>();
-		int max = (1 << trans_slice.size());
-		for(int i = 1 ; i < max ; i++){
-			int temp = i;
-			int index  = 0;
-			ArrayList<Integer> c = new ArrayList<Integer>();
-			while(temp != 0){
-				if((temp&1)!=0){
-					c.add(trans_slice.get(index));
+	private void preProcess(){
+		HashMap<Integer, Integer> hm = new HashMap<Integer,Integer>();
+		ArrayList <TrieNode> L = new ArrayList<TrieNode>();
+		for(ArrayList<Integer> x : transactions){
+			ArrayList <Integer> temp = new ArrayList<Integer>();
+			for(int y : x){
+				if(temp.contains(y)) continue;
+				if(hm.containsKey(y)){
+					hm.put(y, hm.get(y)+1);
 				}
-				index++;
-				temp = temp >> 1;
+				else{
+					hm.put(y, 1);
+				}
+				temp.add(y);
+			}
+		}
+		for (Map.Entry<Integer, Integer> entry : hm.entrySet()) {
+			if(!(entry.getValue() < MIN_SUP))
+				L.add(new TrieNode(entry.getKey()+"",entry.getValue(),root));
+		}
+		L.sort(new Comparator<TrieNode>(){
+
+			@Override
+			public int compare(TrieNode o1, TrieNode o2) {
+				return Integer.parseInt(o1.getID()) - Integer.parseInt(o2.getID());
 			}
 			
-			//combi.add(new GeneralPair<String,Integer>(c, min));
-			if(c.size()==k)
-				combi.add(c);
+		});
+		for(TrieNode x : L){
+			root.addChild(x);
 		}
-		Collections.reverse(combi);
-		return combi;
+		//for(FPNode x : L) System.out.println(x);
 	}
 }
