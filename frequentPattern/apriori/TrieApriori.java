@@ -11,12 +11,14 @@ public class TrieApriori {
 	private TrieNode root;
 	private ArrayList <ArrayList<Integer>> transactions;
 	private int MIN_SUP = 2;
+	private double min_sup_perc = 0.6;
 	private String filename;
 	public TrieApriori(String filename){
 		this.filename = filename;
 		root = new TrieNode(null,0,null);
 		transactions = new ArrayList <ArrayList<Integer>> ();
 		init();
+		MIN_SUP = (int)(transactions.size() * min_sup_perc);
 		int depth = triepriori(1);
 		for(int i = 2 ; i < depth; i++){
 			mine(i,"",0,root);
@@ -66,6 +68,7 @@ public class TrieApriori {
 		
 	}
 	private int triepriori(int k){
+		System.out.println("running: "+k);
 		traverse_database(k);
 		if(candidateGeneration(k) != 0)
 			return triepriori(k+1);
@@ -110,53 +113,59 @@ public class TrieApriori {
 				tempNode = tempNode.getParent();
 			}
 			Collections.reverse(path);
-			ArrayList<ArrayList<Integer>> combination = createCombination(k+1, path);
-			for(ArrayList <Integer> x : combination){
-				if(!traverseTrie(x)){
+			//ArrayList<ArrayList<Integer>> combination = createCombination(k+1, path);
+			if(path.size() != 1)
+				for(int index = 0 ; index < path.size(); index++){
+					if(!traverseTrie(path,index)) 
+						removableIndex.add(i);
+				}
+			/*for(ArrayList <Integer> x : combination){
+				if(!traverseTrie(x,-1)){
 					removableIndex.add(i);
 				}
-			}
+			}*/
 		}
 		for(int i = removableIndex.size() -1 ; i>= 0 ; i--){
 			node.removeChild(i);
 		}
 		return node.getChildCount();
 	}
-	private boolean traverseTrie(ArrayList <Integer> x){
+	private boolean traverseTrie(ArrayList <Integer> x,int skip){
 		TrieNode tempRoot = root;
-		int index = 0;
-		while(tempRoot.getChildCount() != 0){
-			for(int i = 0 ; i < tempRoot.getChildCount(); i++){
-				if(index == x.size()) return true;
-				if(tempRoot.getChild(i).getID().equals(x.get(index)+"")){
-					index++;
-					tempRoot = tempRoot.getChild(i);
+		int count = 0;
+		for(int i = 0; i < x.size(); i++){
+			if(i == skip) continue;
+			for(int j = 0 ; j < tempRoot.getChildCount(); j++){
+				if(tempRoot.getChild(j).getID().equals(x.get(i)+"")){
+					tempRoot = tempRoot.getChild(j);
+					count++;
 				}
 			}
 		}
+		if(count == x.size() - 1)
+			return true;
 		return false;
 	}
 	
 	private void traverse_database(int k){
 		for(ArrayList<Integer> x : transactions){		//read the database
-			ArrayList <ArrayList <Integer>> combination = createCombination(k,x); //create subsets of length k
-			for(ArrayList <Integer> y : combination){		//iterate the TRIE for all the combinations to increase count
-				TrieNode temp_root = root;
-				int depth = 0;
-				for(int z : y){
-					for(int i = 0 ; i < temp_root.getChildCount(); i++){
-						if(temp_root.getChild(i).getID().equals(z+"")){
-							temp_root = temp_root.getChild(i);
-							depth++;
-						}
-					}
-				}
-				if(depth == k)
-					temp_root.setCount(temp_root.getCount() + 1);
-			}
+			addTransaction(x,k,root,0,0);
 		}
 		//run a dfs for level k, and remove any node that is less than min_sup
 		removeUnworthyNode(k, root, 0);
+	}
+	private void addTransaction(ArrayList<Integer> x, int k, TrieNode node, int index, int depth){
+		if(k == depth){
+			node.setCount(node.getCount()+1);
+			return;
+		}
+		if(index == x.size()) return;
+		for(int i = 0; i < node.getChildCount(); i++){
+			if(node.getChild(i).getID().equals(x.get(index)+"")){
+				addTransaction(x,k,node.getChild(i),index+1, depth+1);
+			}
+		}
+		addTransaction(x,k,node,index+1,depth);
 	}
 	private TrieNode removeUnworthyNode(int k, TrieNode node,int depth){
 		if(depth == k){
