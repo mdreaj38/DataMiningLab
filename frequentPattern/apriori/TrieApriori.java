@@ -17,7 +17,7 @@ public class TrieApriori {
 	private String filename;
 	public TrieApriori(String filename){
 		this.filename = filename;
-		root = new TrieNode(null,0,null);
+		root = new TrieNode(-1,0,null);
 		transactions = new ArrayList <ArrayList<Integer>> ();
 		init();
 		MIN_SUP = (int)(transactions.size() * min_sup_perc);
@@ -69,7 +69,7 @@ public class TrieApriori {
 			return;
 		}
 		for(int i = 0 ; i < node.getChildCount(); i++){
-			if(node.getID()==null)
+			if(node.getID()==-1)
 				mine(k,show,depth+1,node.getChild(i));
 			else
 				mine(k,show+" "+node.getID(),depth+1,node.getChild(i));
@@ -98,7 +98,7 @@ public class TrieApriori {
 			ArrayList<Integer> path = new ArrayList<Integer>();
 			TrieNode tempNode = node;
 			while(tempNode != root){
-				path.add(Integer.parseInt(tempNode.getID()));
+				path.add(tempNode.getID());
 				tempNode = tempNode.getParent();
 			}
 			Collections.reverse(path);
@@ -119,7 +119,7 @@ public class TrieApriori {
 		for(int i = 0; i < x.size(); i++){
 			if(i == skip) continue;
 			for(int j = 0 ; j < tempRoot.getChildCount(); j++){
-				if(tempRoot.getChild(j).getID().equals(x.get(i)+"")){
+				if(tempRoot.getChild(j).getID() == x.get(i)){
 					tempRoot = tempRoot.getChild(j);
 					count++;
 				}
@@ -131,26 +131,41 @@ public class TrieApriori {
 	}
 	
 	private void traverse_database(int k){
-		//int row = 0;
 		for(ArrayList<Integer> x : transactions){		//read the database
 			addTransaction(x,k,root,0,0);
-			//System.out.println(row++);
 		}
 		//run a dfs for level k, and remove any node that is less than min_sup
 		removeUnworthyNode(k, root, 0);
 	}
-	private void addTransaction(ArrayList<Integer> x, int k, TrieNode node, int index, int depth){
+	/*private void addTransaction(ArrayList<Integer> transaction, int k, TrieNode node, int index, int depth){
 		if(k == depth){
 			node.setCount(node.getCount()+1);
 			return;
 		}
-		if(index == x.size()) return;
+		if(index == transaction.size()) return;
 		for(int i = 0; i < node.getChildCount(); i++){
-			if(node.getChild(i).getID().equals(x.get(index)+"")){
-				addTransaction(x,k,node.getChild(i),index+1, depth+1);
+			if(node.getChild(i).getID() == transaction.get(index)){
+				addTransaction(transaction,k,node.getChild(i),index+1, depth+1);
 			}
 		}
-		addTransaction(x,k,node,index+1,depth);
+		addTransaction(transaction,k,node,index+1,depth);
+	}*/
+	private void addTransaction(ArrayList<Integer> transaction, int k, TrieNode node, int index, int depth){
+		if(k == depth){
+			node.setCount(node.getCount()+1);
+			return;
+		}
+		int i = index, j = 0;
+		while(i < transaction.size() - k + depth + 1 && j < node.getChildCount()){
+			int comp = node.getChild(j).getID() - transaction.get(i);
+			if(comp == 0){
+				addTransaction(transaction,k,node.getChild(j),i+1, depth+1);
+				i++;
+			}
+			else if(comp > 0) i++;
+			else if(comp < 0) j++;
+		}
+		//addTransaction(transaction,k,node,index+1,depth);
 	}
 	private TrieNode removeUnworthyNode(int k, TrieNode node,int depth){
 		if(depth == k){
@@ -186,13 +201,13 @@ public class TrieApriori {
 		}
 		for (Map.Entry<Integer, Integer> entry : hm.entrySet()) {
 			if(!(entry.getValue() < MIN_SUP))
-				L.add(new TrieNode(entry.getKey()+"",entry.getValue(),root));
+				L.add(new TrieNode(entry.getKey(),entry.getValue(),root));
 		}
 		L.sort(new Comparator<TrieNode>(){
 
 			@Override
 			public int compare(TrieNode o1, TrieNode o2) {
-				return Integer.parseInt(o1.getID()) - Integer.parseInt(o2.getID());
+				return o1.getID() - o2.getID();
 			}
 			
 		});

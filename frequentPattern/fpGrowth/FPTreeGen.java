@@ -10,7 +10,6 @@ public class FPTreeGen {
 	private FPNode root;
 	private ArrayList<FPNode> L;
 	private ArrayList <ArrayList<Integer>> Transaction;
-	private HashMap<String , ArrayList<generatedFP>> genFP;
 	private int MIN_SUP;
 	
 	
@@ -19,10 +18,6 @@ public class FPTreeGen {
 		this.Transaction = Transaction;
 		this.MIN_SUP = MIN_SUP;
 		root = new FPNode(null,0,null);
-		genFP = new HashMap <String, ArrayList<generatedFP>>();
-		for(FPNode x : L){
-			genFP.put(x.getID(), new ArrayList <generatedFP>());
-		}
 		fpGen();
 		FP_Growth(root,new ArrayList <FPNode> () , L);
 	}
@@ -70,14 +65,6 @@ public class FPTreeGen {
 				
 				ArrayList <FPNode> tempL = new ArrayList <FPNode>();
 				ArrayList <Pair> tempTrans = createPatternBase(i,L, tempL);
-				//ajaira code starts
-				/*System.out.println("header table of " + beta.get(0));
-				for(FPNode x : tempL) System.out.println(x);
-				System.out.println("\ndone header table");
-				System.out.println("conditional pattern base of " + beta.get(0));
-				for(Pair x : tempTrans) System.out.print(x + " ");
-				System.out.println("\ndone conditional pattern base");*/
-				//ajaira code ends
 				FPNode TreeBeta = new FPNode(null,0,null);
 				fpGen(TreeBeta, tempTrans, tempL);
 				if(TreeBeta.getChildrenCount() != 0){
@@ -108,7 +95,7 @@ public class FPTreeGen {
 				index++;
 				temp = temp >> 1;
 			}
-			
+			if(!(min < MIN_SUP))
 			combi.add(new GeneralPair<String,Integer>(c, min));
 		}
 		return combi;
@@ -212,18 +199,6 @@ public class FPTreeGen {
 		}
 		cuRoot.incCountOfChildBy(index, supCount);
 		return index;
-	}
-	private class generatedFP{
-		private ArrayList <Integer> nodes;
-		private int supportCount;
-		public generatedFP(ArrayList <Integer> nodes, int supportCount){
-			this.nodes = nodes;
-			this.supportCount = supportCount;
-		}
-		public int getSize(){ return nodes.size();}
-		public int getSupportCount() { return supportCount; }
-		public int getNode(int index) { return nodes.get(index); }
-		
 	}
 	private class GeneralPair<T,P>{
 		private T t;
