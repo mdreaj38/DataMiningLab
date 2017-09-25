@@ -15,6 +15,7 @@ public class TrieApriori {
 	private int MIN_SUP = 2;
 	private double min_sup_perc = 0.3;
 	private String filename;
+	private int fp = 0;
 	public TrieApriori(String filename){
 		this.filename = filename;
 		root = new TrieNode(-1,0,null);
@@ -23,9 +24,10 @@ public class TrieApriori {
 		MIN_SUP = (int)(transactions.size() * min_sup_perc);
 		preProcess();
 		int depth = triepriori(1);
-		for(int i = 2 ; i < depth; i++){
+		for(int i = 2 ; i <= depth; i++){
 			mine(i,"",0,root);
 		}
+		System.out.println("frequent pattern: " + fp);
 	}
 	private void init(){
 		Scanner s = null;
@@ -57,14 +59,17 @@ public class TrieApriori {
 	}
 	private int triepriori(int k){
 		System.out.println("running: "+k);
-		if(k != 1)
+		if(k != 1){
 			traverse_database(k);
-		if(candidateGeneration(k) != 0)
+		}
+		if(candidateGeneration(k) != 0){
 			return triepriori(k+1);
+		}
 		return k;
 	}
 	private void mine(int k, String show, int depth, TrieNode node){
 		if(depth == k){
+			fp++;
 			System.out.println(show + " " + node.getID() + " : " + node.getCount());
 			return;
 		}
