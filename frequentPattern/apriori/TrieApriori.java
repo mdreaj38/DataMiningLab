@@ -13,7 +13,7 @@ public class TrieApriori {
 	private TrieNode root;
 	private ArrayList <ArrayList<Integer>> transactions;
 	private int MIN_SUP = 2;
-	private double min_sup_perc = 0.001;
+	private double min_sup_perc = 0.3;
 	private String filename;
 	public TrieApriori(String filename){
 		this.filename = filename;
