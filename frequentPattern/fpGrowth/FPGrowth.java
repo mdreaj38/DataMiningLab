@@ -12,7 +12,7 @@ public class FPGrowth {
 	private ArrayList < ArrayList <Integer> > transaction;
 	private ArrayList <FPNode> L;
 	private int MIN_SUP = 2;
-	private double min_sup_perc = 0.01;
+	private double min_sup_perc = 0.3;
 	private String filename;
 	
 	public FPGrowth(String filename) throws FileNotFoundException{
@@ -20,8 +20,9 @@ public class FPGrowth {
 		transaction = new ArrayList<ArrayList<Integer>>();
 		L = new ArrayList<FPNode>();
 		init();
-		preProcess();
 		MIN_SUP = (int)(transaction.size() * min_sup_perc);
+		preProcess();
+		
 		new FPTreeGen(L,transaction,MIN_SUP);
 	}
 	private void preProcess(){

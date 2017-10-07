@@ -11,7 +11,7 @@ public class FPTreeGen {
 	private ArrayList<FPNode> L;
 	private ArrayList <ArrayList<Integer>> Transaction;
 	private int MIN_SUP;
-	
+	private int count;
 	
 	public FPTreeGen(ArrayList<FPNode> L, ArrayList <ArrayList<Integer>> Transaction,int MIN_SUP){
 		this.L = L;
@@ -20,6 +20,7 @@ public class FPTreeGen {
 		root = new FPNode(null,0,null);
 		fpGen();
 		FP_Growth(root,new ArrayList <FPNode> () , L);
+		System.out.println("number of patterns: " + (count + L.size()));
 	}
 	
 	public void FP_Growth(FPNode root, ArrayList<FPNode> alpha, ArrayList <FPNode> L){
@@ -39,6 +40,7 @@ public class FPTreeGen {
 					temp += ", " + x.getID();
 					
 				}
+				count++;
 				System.out.println("{"+temp + ":" + sup +"}");
 			}
 		}
@@ -60,6 +62,7 @@ public class FPTreeGen {
 						else
 							temp += ", " + x.getID();
 					}
+					count++;
 					System.out.println("{"+temp + ":" + supCount +"}");
 				}
 				

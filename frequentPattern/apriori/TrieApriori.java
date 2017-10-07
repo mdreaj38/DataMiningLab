@@ -13,21 +13,27 @@ public class TrieApriori {
 	private TrieNode root;
 	private ArrayList <ArrayList<Integer>> transactions;
 	private int MIN_SUP = 2;
-	private double min_sup_perc = 0.3;
+	private double min_sup_perc = 0.6;
 	private String filename;
 	private int fp = 0;
+	private int actual[] = new int[100];
+	private int afterPruning[] = new int[100];
+	private int apparent[] = new int[100];
 	public TrieApriori(String filename){
 		this.filename = filename;
 		root = new TrieNode(-1,0,null);
 		transactions = new ArrayList <ArrayList<Integer>> ();
 		init();
-		MIN_SUP = (int)(transactions.size() * min_sup_perc);
+		MIN_SUP = (int)Math.ceil((transactions.size() * min_sup_perc));
 		preProcess();
 		int depth = triepriori(1);
-		for(int i = 2 ; i <= depth; i++){
+		for(int i = 1 ; i <= depth; i++){
 			mine(i,"",0,root);
 		}
 		System.out.println("frequent pattern: " + fp);
+		for(int i = 0 ; i < depth; i++){
+			System.out.println(apparent[i] + " " + afterPruning[i] + " " + actual[i]);
+		}
 	}
 	private void init(){
 		Scanner s = null;
@@ -70,7 +76,8 @@ public class TrieApriori {
 	private void mine(int k, String show, int depth, TrieNode node){
 		if(depth == k){
 			fp++;
-			System.out.println(show + " " + node.getID() + " : " + node.getCount());
+			actual[k-1]++;
+			//System.out.println(show + " " + node.getID() + " : " + node.getCount());
 			return;
 		}
 		for(int i = 0 ; i < node.getChildCount(); i++){
@@ -85,11 +92,22 @@ public class TrieApriori {
 	}
 	private int subsetGeneration(int k,TrieNode node, int depth, int index){
 		if(k == depth){
+			int count = 0;
 			TrieNode parent = node.getParent();
+			ArrayList <TrieNode> toBeAdded = new ArrayList<TrieNode>();
 			for(int i = index+1; i < parent.getChildCount(); i++){
-				node.addChild(new TrieNode(parent.getChild(i).getID(),0,node));
+				//node.addChild(new TrieNode(parent.getChild(i).getID(),0,node));
+				if(addOrPrune(node, parent.getChild(i).getID())){
+					count++;
+					//node.addChild(new TrieNode(parent.getChild(i).getID(),0,node));
+					toBeAdded.add(new TrieNode(parent.getChild(i).getID(),0,node));
+				}
+				apparent[k]++;
 			}
-			return prune(node,k);
+			afterPruning[k] += toBeAdded.size();
+			//System.out.println("to be added: " + toBeAdded);
+			for(TrieNode x : toBeAdded) node.addChild(x);
+			return count;
 		}
 		int count = 0;
 		for(int i = 0 ; i < node.getChildCount(); i++){
@@ -97,41 +115,33 @@ public class TrieApriori {
 		}
 		return count;
 	}
-	private int prune(TrieNode node,int k){
-		ArrayList <Integer> removableIndex = new ArrayList <Integer> ();
-		for(int i = 0 ; i < node.getChildCount(); i++){
-			ArrayList<Integer> path = new ArrayList<Integer>();
-			TrieNode tempNode = node;
-			while(tempNode != root){
-				path.add(tempNode.getID());
-				tempNode = tempNode.getParent();
-			}
-			Collections.reverse(path);
-			if(path.size() != 1)
-				for(int index = 0 ; index < path.size(); index++){
-					if(!traverseTrie(path,index)) 
-						removableIndex.add(i);
-				}
+	private boolean addOrPrune(TrieNode node, int ID){
+		ArrayList<Integer> path = new ArrayList<Integer>();
+		TrieNode temp = node;
+		while(temp != root){
+			path.add(temp.getID());
+			temp = temp.getParent();
 		}
-		for(int i = removableIndex.size() -1 ; i>= 0 ; i--){
-			node.removeChild(i);
+		Collections.reverse(path);
+		path.add(ID);
+		for(int i = 0 ; i < path.size(); i++){
+			//System.out.println(path);
+			if(!checkTrie(path, i, root, 0))return false;
 		}
-		return node.getChildCount();
+		return true;
 	}
-	private boolean traverseTrie(ArrayList <Integer> x,int skip){
-		TrieNode tempRoot = root;
-		int count = 0;
-		for(int i = 0; i < x.size(); i++){
-			if(i == skip) continue;
-			for(int j = 0 ; j < tempRoot.getChildCount(); j++){
-				if(tempRoot.getChild(j).getID() == x.get(i)){
-					tempRoot = tempRoot.getChild(j);
-					count++;
-				}
+	private boolean checkTrie(ArrayList<Integer> path, int skip, TrieNode node, int index){
+		if(node.getChildCount() == 0 && index == path.size()){
+			//System.out.println(path);
+			return true;
+		}
+		if(index == skip) return checkTrie(path,skip,node,index+1);
+		for(int i = 0 ; i < node.getChildCount(); i++){
+			if(path.get(index) == node.getChild(i).getID()){
+				//System.out.println(node.getChild(i).getID());
+				return checkTrie(path,skip,node.getChild(i), index+1);
 			}
 		}
-		if(count == x.size() - 1)
-			return true;
 		return false;
 	}
 	
@@ -142,19 +152,7 @@ public class TrieApriori {
 		//run a dfs for level k, and remove any node that is less than min_sup
 		removeUnworthyNode(k, root, 0);
 	}
-	/*private void addTransaction(ArrayList<Integer> transaction, int k, TrieNode node, int index, int depth){
-		if(k == depth){
-			node.setCount(node.getCount()+1);
-			return;
-		}
-		if(index == transaction.size()) return;
-		for(int i = 0; i < node.getChildCount(); i++){
-			if(node.getChild(i).getID() == transaction.get(index)){
-				addTransaction(transaction,k,node.getChild(i),index+1, depth+1);
-			}
-		}
-		addTransaction(transaction,k,node,index+1,depth);
-	}*/
+	
 	private void addTransaction(ArrayList<Integer> transaction, int k, TrieNode node, int index, int depth){
 		if(k == depth){
 			node.setCount(node.getCount()+1);
@@ -207,6 +205,7 @@ public class TrieApriori {
 		for (Map.Entry<Integer, Integer> entry : hm.entrySet()) {
 			if(!(entry.getValue() < MIN_SUP))
 				L.add(new TrieNode(entry.getKey(),entry.getValue(),root));
+			apparent[0]++;
 		}
 		L.sort(new Comparator<TrieNode>(){
 
@@ -219,6 +218,7 @@ public class TrieApriori {
 		for(TrieNode x : L){
 			root.addChild(x);
 		}
+		afterPruning[0] = apparent[0];
 		//for(FPNode x : L) System.out.println(x);
 	}
 }
