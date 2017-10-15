@@ -13,7 +13,7 @@ public class TrieApriori {
 	private TrieNode root;
 	private ArrayList <ArrayList<Integer>> transactions;
 	private int MIN_SUP = 2;
-	private double min_sup_perc = 0.6;
+	private double min_sup_perc = 0.5;
 	private String filename;
 	private int fp = 0;
 	private int actual[] = new int[100];
@@ -25,6 +25,7 @@ public class TrieApriori {
 		transactions = new ArrayList <ArrayList<Integer>> ();
 		init();
 		MIN_SUP = (int)Math.ceil((transactions.size() * min_sup_perc));
+		
 		preProcess();
 		int depth = triepriori(1);
 		for(int i = 1 ; i <= depth; i++){
@@ -34,6 +35,7 @@ public class TrieApriori {
 		for(int i = 0 ; i < depth; i++){
 			System.out.println(apparent[i] + " " + afterPruning[i] + " " + actual[i]);
 		}
+		System.out.println(MIN_SUP);
 	}
 	private void init(){
 		Scanner s = null;
