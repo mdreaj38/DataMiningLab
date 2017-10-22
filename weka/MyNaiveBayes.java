@@ -7,10 +7,10 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
-public class Test {
+public class MyNaiveBayes {
 	
-	public Test() throws Exception{
-		BufferedReader reader = new BufferedReader(new FileReader("data/weather.nominal.arff"));
+	public MyNaiveBayes(String filename) throws Exception{
+		BufferedReader reader = new BufferedReader(new FileReader(filename));
 		Instances data = new Instances(reader);
 		reader.close();
 		//setting class attributes
@@ -23,5 +23,14 @@ public class Test {
 		eval.evaluateModel(nb, data);
 		System.out.println(eval.toSummaryString("\nResults\n======\n", false));
 		
+		// Print Confusion Matrix
+        double conMat[][]= eval.confusionMatrix();
+        for (int i=0;i<conMat.length;++i) {
+            for (int j=0;j<conMat[i].length;++j) {
+                System.out.print(conMat[i][j]+" ");
+            }
+            System.out.println();
+        }
+        weka.core.SerializationHelper.write("naiveBayes.model", nb);
 	}
 }
