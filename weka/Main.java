@@ -4,6 +4,9 @@ import java.util.Scanner;
 
 public class Main {
 	public static void main(String args[]) throws Exception{
+		new Shift("data/weather.nominal");
+	}
+	public static void menu() throws Exception{
 		Scanner s = new Scanner(System.in);
 		boolean running = true;
 		while(running){
