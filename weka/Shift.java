@@ -9,12 +9,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Scanner;
 
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.output.prediction.PlainText;
 import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.trees.J48;
+import weka.classifiers.trees.REPTree;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -34,10 +37,11 @@ public class Shift {
 		
 		NumericToNominal weka_filter = new NumericToNominal();
         weka_filter.setInputFormat(data);
+        weka_filter.setAttributeIndices("2");
         data = Filter.useFilter(data, weka_filter);
 		
-		int splitIndex = getSplitIndex(data);
-		//int splitIndex = 4;
+		//int splitIndex = getSplitIndex(data);
+		int splitIndex = 1;
 		splitValues = data.attribute(splitIndex);
 		splitFiles(data, splitValues);
 		for(int i = 0; i < splitValues.numValues(); i++){
@@ -50,7 +54,7 @@ public class Shift {
 		for(int i = 0 ; i < splitValues.numValues(); i++){
 			for(int j = 0 ; j < splitValues.numValues(); j++){
 				if(!splitValues.value(i).equals(splitValues.value(j)) && !ran[i][j]){
-					ran[i][j] = ran[j][i] = true;
+					ran[i][j] = true;
 					testEachOther(splitValues.value(i),splitValues.value(j));
 				}
 			}
@@ -62,19 +66,34 @@ public class Shift {
 		reader.close();
 		testData.setClassIndex(testData.numAttributes() -1 );
 		
+		reader = new BufferedReader(new FileReader(filename+"_"+testWith+".arff"));
+		Instances testWithData = new Instances(reader);
+		reader.close();
+		testWithData.setClassIndex(testWithData.numAttributes() -1 );
+		
+		NumericToNominal weka_filter = new NumericToNominal();
+        weka_filter.setInputFormat(testData);
+        weka_filter.setAttributeIndices("2");
+        testData = Filter.useFilter(testData, weka_filter);
+		
 		StringBuffer predsBuffer = new StringBuffer();
         PlainText plainText = new PlainText();
         plainText.setHeader(testData);
         plainText.setBuffer(predsBuffer);
         
-        MultilayerPerceptron classifier = (MultilayerPerceptron) weka.core.SerializationHelper
+        //MultilayerPerceptron classifier = (MultilayerPerceptron) weka.core.SerializationHelper
+        //        .read(new FileInputStream(new File(filename+"_"+testWith+".model")));
+        
+        REPTree classifier = (REPTree) weka.core.SerializationHelper
                 .read(new FileInputStream(new File(filename+"_"+testWith+".model")));
         
-        Evaluation eval = new Evaluation(testData);
+        Evaluation eval = new Evaluation(testWithData);
         eval.evaluateModel(classifier, testData,plainText);
+       
         
         System.out.println("Testing between "+test + " and " + testWith + ":");
         System.out.println("error rate: " + eval.errorRate());
+        System.out.println(eval.toSummaryString());
         //System.out.println(predsBuffer);
 		
 	}
@@ -84,17 +103,25 @@ public class Shift {
 		reader.close();
 		data.setClassIndex(data.numAttributes() -1 );
 		
-		MultilayerPerceptron mlp = new MultilayerPerceptron();
+		/*MultilayerPerceptron mlp = new MultilayerPerceptron();
         //NaiveBayes n= new NaiveBayes();
         //Setting Parameters
         mlp.setLearningRate(0.1);
         mlp.setTrainingTime(500);
         mlp.setHiddenLayers("3");
-        mlp.buildClassifier(data);
+        mlp.buildClassifier(data);*/
+		
+		//J48 mlp = new J48();
+		//mlp.buildClassifier(data);
         
+		REPTree mlp = new REPTree();
+		mlp.buildClassifier(data);
+		
         Evaluation eval = new Evaluation(data);
-        eval.evaluateModel(mlp, data);
-        System.out.println(eval.errorRate()); //Printing Training Mean root squared Error
+        eval.crossValidateModel(mlp, data, 3, new Random(1));
+        //eval.evaluateModel(mlp, data);
+        
+        System.out.println("cross validation error rate of attribute:" + attributeValue + ":\n"+ eval.errorRate()); //Printing Training Mean root squared Error
         System.out.println(eval.toSummaryString()); //Summary of Training
         
         weka.core.SerializationHelper.write(filename+"_"+attributeValue+".model", mlp);
@@ -118,9 +145,6 @@ public class Shift {
 		}
 		//take tuple from data and add it to their respective hashmap
 		for(int i = 0; i < data.size(); i++){
-			System.out.println(data.instance(i));
-			System.out.println(splitValues);
-			System.out.println(data.instance(i).stringValue(splitValues));
 			splitInstance.get(data.instance(i).stringValue(splitValues)).add(data.instance(i));
 		}
 		//write the split instances to their respective files
