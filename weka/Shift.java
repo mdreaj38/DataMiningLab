@@ -18,6 +18,8 @@ import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NumericToNominal;
 
 public class Shift {
 	private String filename;
@@ -30,7 +32,12 @@ public class Shift {
 		//setting class attributes
 		data.setClassIndex(data.numAttributes() -1 );
 		
+		NumericToNominal weka_filter = new NumericToNominal();
+        weka_filter.setInputFormat(data);
+        data = Filter.useFilter(data, weka_filter);
+		
 		int splitIndex = getSplitIndex(data);
+		//int splitIndex = 4;
 		splitValues = data.attribute(splitIndex);
 		splitFiles(data, splitValues);
 		for(int i = 0; i < splitValues.numValues(); i++){
@@ -67,7 +74,8 @@ public class Shift {
         eval.evaluateModel(classifier, testData,plainText);
         
         System.out.println("Testing between "+test + " and " + testWith + ":");
-        System.out.println(predsBuffer);
+        System.out.println("error rate: " + eval.errorRate());
+        //System.out.println(predsBuffer);
 		
 	}
 	public void trainModel(String attributeValue) throws Exception{
@@ -94,29 +102,34 @@ public class Shift {
 	public void splitFiles(Instances data, Attribute splitValues) throws IOException{
 		
 		String header = createHeader();
-		HashMap<String, ArrayList<Instance>> hm = new HashMap<String, ArrayList<Instance>>();
-		HashMap<String, FileWriter> fileWrite = new HashMap<String, FileWriter>();
-		
+		HashMap<String, ArrayList<Instance>> splitInstance = new HashMap<String, ArrayList<Instance>>();
+		HashMap<String, FileWriter> splitfileWrite = new HashMap<String, FileWriter>();
+		//initialize hashmap for split instances and filewriter. 
+		//also add header to each file where the split instances will be written.
 		for(int i = 0; i < splitValues.numValues(); i++){
 			System.out.println(splitValues.value(i));
-			if(!hm.containsKey(splitValues.value(i)))
-				hm.put(splitValues.value(i), new ArrayList<Instance>());
-			if(!fileWrite.containsKey(splitValues.value(i))){
-				fileWrite.put(splitValues.value(i), new FileWriter(
+			if(!splitInstance.containsKey(splitValues.value(i)))
+				splitInstance.put(splitValues.value(i), new ArrayList<Instance>());
+			if(!splitfileWrite.containsKey(splitValues.value(i))){
+				splitfileWrite.put(splitValues.value(i), new FileWriter(
 						new File(filename+"_"+splitValues.value(i))+".arff"));
-				fileWrite.get(splitValues.value(i)).write(header);
+				splitfileWrite.get(splitValues.value(i)).write(header);
 			}
 		}
+		//take tuple from data and add it to their respective hashmap
 		for(int i = 0; i < data.size(); i++){
-			//System.out.println(data.instance(i));
-			hm.get(data.instance(i).stringValue(splitValues)).add(data.instance(i));
+			System.out.println(data.instance(i));
+			System.out.println(splitValues);
+			System.out.println(data.instance(i).stringValue(splitValues));
+			splitInstance.get(data.instance(i).stringValue(splitValues)).add(data.instance(i));
 		}
+		//write the split instances to their respective files
 		for(int i = 0; i < splitValues.numValues(); i++){
 			//System.out.println(hm.get(splitValues.value(i)));
-			for(Instance x : hm.get(splitValues.value(i))){
-				fileWrite.get(splitValues.value(i)).write(x.toString()+"\n");
+			for(Instance x : splitInstance.get(splitValues.value(i))){
+				splitfileWrite.get(splitValues.value(i)).write(x.toString()+"\n");
 			}
-			fileWrite.get(splitValues.value(i)).close();
+			splitfileWrite.get(splitValues.value(i)).close();
 		}
 		
 	}
@@ -136,6 +149,11 @@ public class Shift {
 	}
 	public int getSplitIndex(Instances data) throws Exception{
 		InfoGainAttributeEval entropy = new InfoGainAttributeEval();
+		
+		NumericToNominal weka_filter = new NumericToNominal();
+        weka_filter.setInputFormat(data);
+        data = Filter.useFilter(data, weka_filter);
+		
 		entropy.buildEvaluator(data);
 		
 		double maxGain = entropy.evaluateAttribute(0);
